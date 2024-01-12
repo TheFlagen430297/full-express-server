@@ -8,6 +8,9 @@ fs.stat(`./src/ExpressServerSettings/config.json`, (err, stat) => {
     if (err) exec("npm init -y & npm i express tcp-port-used", (error, stdout, stderr) => {
         if (error) { console.log(`error: ${error.message}`); return; }
         if (stderr) { console.log(`stderr: ${stderr}`); return; }
+        fs.stat(`./src`, (err, stat) => { if (err) { fs.mkdirSync(__dirname + `/src`); } });
+        fs.stat(`./src/ExpressServerSettings`, (err, stat) => { if (err) { fs.mkdirSync(__dirname + `/src/ExpressServerSettings`); fs.writeFileSync(__dirname + `/src/ExpressServerSettings/config.json`, `{ "BasePage":"home.html", "ErrorPage": "404.html"}`); } })
+        fs.stat(`./src/public_html`, (err, stat) => { if (err) { fs.mkdirSync(__dirname + `/src/public_html`); } })
         console.log(`Done`)
         StartService()
     });
@@ -34,11 +37,6 @@ function StartService() {
 
     console.clear()
 
-    //? This creates the files and folders needed
-    fs.stat(`./src`, (err, stat) => { if (err) { fs.mkdirSync(__dirname + `/src`); } });
-    fs.stat(`./src/ExpressServerSettings`, (err, stat) => { if (err) { fs.mkdirSync(__dirname + `/src/ExpressServerSettings`); fs.writeFileSync(__dirname + `/src/ExpressServerSettings/config.json`, `{ "BasePage":"home.html"}`); } })
-    fs.stat(`./src/public_html`, (err, stat) => { if (err) { fs.mkdirSync(__dirname + `/src/public_html`); } })
-
     setTimeout(() => {
         /**The Server Settings */
         let ess = JSON.parse(fs.readFileSync(`./src/ExpressServerSettings/config.json`))
@@ -46,17 +44,23 @@ function StartService() {
         EXPRESS.get(`*`, (req, res) => {
             if (req.path == `/favicon.ico`) return res.status(404).send({ status: 404, message: `Querying /favicon.ico is not supported on this server, please set your favicon in your HTML Code.`})
             let routes = fs.readdirSync(`./src/public_html`);
-            if (req.path == "/") res.sendFile(__dirname + `/src/public_html/` + ess.BasePage);
-            else {
-                fs.stat(`./src/public_html/` + req.path, (err, stat) => {
-                    if (err) {
-                        fs.stat(`./src/public_html/` + ess.ErrorPage, (err, stat) => {
-                            if (err) res.status(404).send(`Wow, the 404 page couldn't be found, neither could the page that you are looking for, both are 404 Not Found`);
-                            else res.status(404).sendFile(__dirname + `/src/public_html/` + ess.ErrorPage);
-                        })
-                    } else res.status(200).sendFile(__dirname + `/src/public_html/` + req.path);
-                })
-            }
+            fs.stat(`./src/public_html/` + req.path, (err, stat) => {
+                if (err) return error()    
+                else if (req.path == "/") {
+                    fs.stat(`./src/public_html/` + ess.BasePage, (e, s) => {
+                        if (e) return error()
+                        else res.sendFile(__dirname + `/src/public_html/` + ess.BasePage);
+                    })
+                }
+                else res.status(200).sendFile(__dirname + `/src/public_html/` + req.path);
+
+                function error() {
+                    fs.stat(`./src/public_html/` + ess.ErrorPage, (err, stat) => {
+                        if (err) res.status(404).send(`Wow, the 404 page couldn't be found, neither could the page that you are looking for, both are 404 Not Found`);
+                        else res.status(404).sendFile(__dirname + `/src/public_html/` + ess.ErrorPage);
+                    })
+                }
+            })
         })
 
 
