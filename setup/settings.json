@@ -1,12 +1,12 @@
 {
     "loadExamplePages": [
         {
-            name: "404.html",
-            link: "https://raw.githubusercontent.com/TheFlagen430297/full-express-server/main/setup/examplePages/404.html"
+            "name": "404.html",
+            "link": "https://raw.githubusercontent.com/TheFlagen430297/full-express-server/main/setup/examplePages/404.html"
         },
         {
-            name: "home.html",
-            link: "https://raw.githubusercontent.com/TheFlagen430297/full-express-server/main/setup/examplePages/home.html"
+            "name": "home.html",
+            "link": "https://raw.githubusercontent.com/TheFlagen430297/full-express-server/main/setup/examplePages/home.html"
         } 
     ]
 }

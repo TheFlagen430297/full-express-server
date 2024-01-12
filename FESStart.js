@@ -10,7 +10,14 @@ fs.stat(`./src/ExpressServerSettings/config.json`, (err, stat) => {
         if (stderr) { console.log(`stderr: ${stderr}`); return; }
         fs.stat(`./src`, (err, stat) => { if (err) { fs.mkdirSync(__dirname + `/src`); } });
         fs.stat(`./src/ExpressServerSettings`, (err, stat) => { if (err) { fs.mkdirSync(__dirname + `/src/ExpressServerSettings`); fs.writeFileSync(__dirname + `/src/ExpressServerSettings/config.json`, `{ "BasePage":"home.html", "ErrorPage": "404.html"}`); } })
-        fs.stat(`./src/public_html`, (err, stat) => { if (err) { fs.mkdirSync(__dirname + `/src/public_html`); } })
+        fs.stat(`./src/public_html`, (err, stat) => { if (err) { fs.mkdirSync(__dirname + `/src/public_html`); } });
+        fetch(`https://raw.githubusercontent.com/TheFlagen430297/full-express-server/main/setup/settings.json`).then(x => x.json()).then(y => {
+            y.loadExamplePages.forEach(element => {
+                fetch(element.link).then(x => x.text()).then(y => {
+                    fs.writeFileSync(`./src/public_html/${element.name}`, y)
+                })
+            });
+        })
         console.log(`Done`)
         StartService()
     });
