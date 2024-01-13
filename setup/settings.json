@@ -2,11 +2,23 @@
     "loadExamplePages": [
         {
             "name": "404.html",
+            "paths": null,
             "link": "https://raw.githubusercontent.com/TheFlagen430297/full-express-server/main/setup/examplePages/404.html"
         },
         {
             "name": "home.html",
+            "paths": null,
             "link": "https://raw.githubusercontent.com/TheFlagen430297/full-express-server/main/setup/examplePages/home.html"
-        } 
+        },
+        {
+            "name": "subdomain.html",
+            "paths": ["admin"],
+            "link": "https://raw.githubusercontent.com/TheFlagen430297/full-express-server/main/setup/examplePages/subdomain.html"
+        },
+        {
+            "name": "index.js",
+            "paths": ["admin"],
+            "link": "https://raw.githubusercontent.com/TheFlagen430297/full-express-server/main/setup/examplePages/subdomainAdmin.js"
+        }
     ]
 }
