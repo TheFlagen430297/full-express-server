@@ -12,12 +12,12 @@
         },
         {
             "name": "subdomain.html",
-            "paths": ["admin"],
+            "paths": ["subdomains", "admin"],
             "link": "https://raw.githubusercontent.com/TheFlagen430297/full-express-server/main/setup/examplePages/subdomain.html"
         },
         {
             "name": "index.js",
-            "paths": ["admin"],
+            "paths": ["subdomains", "admin"],
             "link": "https://raw.githubusercontent.com/TheFlagen430297/full-express-server/main/setup/examplePages/subdomainAdmin.js"
         }
     ]
