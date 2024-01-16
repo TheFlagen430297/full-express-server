@@ -1,10 +1,9 @@
-const express = require("express");
-const admin = express(); //! This line must match the subdomain name (admin.example.com) that you want to use
+const EXPRESS = require("express")();
 const fs = require(`fs`);
 const cookieParser = require('cookie-parser');
-admin.use(cookieParser()) //! This line must match the express(); call above (admin.use(...);)
+EXPRESS.use(cookieParser())
 
-admin.get("*", (req, res) => { //! This line must match the express(); call above (admin.get(...);)
+EXPRESS.get("*", (req, res) => {
     let fileEndRex = /(?:\/)(?:.*)(?:\.)(.*)/
 	if (req.path == `/`) res.status(200).send(`cool`)
     else {
@@ -19,5 +18,4 @@ admin.get("*", (req, res) => { //! This line must match the express(); call abov
     }
 });
 
-exports.admin = admin; //! This line must match the subdomain that you want to use (admin.example.com) at "exports.<subdomain> = <express(); call>", these must match
-//? The file name does not matter
+exports.default = EXPRESS

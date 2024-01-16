@@ -1,4 +1,5 @@
-/setup
 test-*
+package*
 
 node_modules
+/src

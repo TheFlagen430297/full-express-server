@@ -16,14 +16,24 @@
             "link": "https://raw.githubusercontent.com/TheFlagen430297/full-express-server/main/setup/examplePages/home.html"
         },
         {
-            "name": "subdomain.html",
+            "name": "home.html",
             "paths": ["src/subdomains", "src/subdomains/admin"],
-            "link": "https://raw.githubusercontent.com/TheFlagen430297/full-express-server/main/setup/examplePages/subdomain.html"
+            "link": "https://raw.githubusercontent.com/TheFlagen430297/full-express-server/main/setup/examplePages/adminPanel.html"
         },
         {
             "name": "index.js",
             "paths": ["src/subdomains", "src/subdomains/admin"],
             "link": "https://raw.githubusercontent.com/TheFlagen430297/full-express-server/main/setup/examplePages/subdomainAdmin.js"
+        },
+        {
+            "name": "favicon.ico",
+            "paths": null,
+            "link": "https://raw.githubusercontent.com/TheFlagen430297/full-express-server/main/setup/examplePages/favicon.ico"
+        },
+        {
+            "name": "favicon.ico",
+            "paths": ["src/subdomains", "src/subdomains/admin"],
+            "link": "https://raw.githubusercontent.com/TheFlagen430297/full-express-server/main/setup/examplePages/favicon.ico"
         }
     ]
 }

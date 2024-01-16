@@ -1,0 +1,17 @@
+/**
+ * # Full Express Server (FES)
+ * ### dev
+ * This file deletes all the extra files and folders, then starts FESStart.js
+ */
+let HoverExplanation  = "Hover to see tooltip";
+
+const { log } = require("console");
+let { rmSync } = require(`fs`);
+log(`Starting Dev Script`)
+log(`Deleting spare files...`)
+rmSync(`./node_modules`, { recursive: true, force: true });
+rmSync(`./src`, { recursive: true, force: true });
+rmSync(`./package-lock.json`, { recursive: true, force: true });
+rmSync(`./package.json`, { recursive: true, force: true });
+log(`Done, starting setup script...`)
+require(`./FESStart`);
