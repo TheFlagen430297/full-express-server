@@ -3,9 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test - Home</title>
+    <meta name="darkreader-lock" content="true">
+    <title>Admin Panel</title>
+    <style>
+        body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background-color: #131313;
+                color: #e1e1e1;
+                margin: 0;
+            }
+            p {
+                text-align: left;
+                padding-left: 30px;
+                font-size: 30px;
+            }
+            a {
+                color: #33aaff
+            }
+            a:hover {
+                color: #55ffff
+            }
+
+            #nav {
+                background-color: #505050;
+                width: 100%;
+                height: 80px;
+                border-radius: 0px 0px 0px 20px;
+                box-shadow: 2px 2px 20px 1px rgba(0, 0, 0, 0.5);
+            }
+    </style>
 </head>
 <body>
-    Hi Ho
+    <div id="nav"></div>
+    <div id="content">
+        <p id="data">Click to stop server</p>
+        <button onclick="stopServer()">Button</button>
+    </div>
+    <script>
+        function stopServer() {
+            fetch(`http://admin.localhost/controls.js?type=lol&code=2&oauth=2546&user=root`).then(res => res.json()).then(data => {
+                document.getElementById(`data`).innerText = data.message
+            })
+        }
+    </script>
 </body>
 </html>
