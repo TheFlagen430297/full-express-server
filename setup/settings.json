@@ -62,7 +62,7 @@
         },
         {
             "fileName": "index.js",
-            "id": "subdomainAdmin.js",
+            "id": "subdomainAdmin",
             "link": "https://raw.githubusercontent.com/TheFlagen430297/full-express-server/dev/setup/examplePages/subdomain.js"
         },
         {
