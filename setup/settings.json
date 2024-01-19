@@ -1,42 +1,84 @@
 {
-    "ExamplePages": [{
-        "fileName": "404.html",
-        "id": "404",
-        "link": "https://raw.githubusercontent.com/TheFlagen430297/full-express-server/main/setup/examplePages/404.html"
-    },
-    {
-        "fileName": "500.html",
-        "id": "500",
-        "link": "https://raw.githubusercontent.com/TheFlagen430297/full-express-server/main/setup/examplePages/500.html"
-    },
-    {
-        "fileName": "home.html",
-        "id": "home",
-        "link": "https://raw.githubusercontent.com/TheFlagen430297/full-express-server/main/setup/examplePages/home.html"
-    },
-    {
-        "fileName": "home.html",
-        "id": "adminPanel",
-        "link": "https://raw.githubusercontent.com/TheFlagen430297/full-express-server/main/setup/examplePages/adminPanel.html"
-    },
-    {
-        "fileName": "index.js",
-        "id": "subdomainAdmin.js",
-        "link": "https://raw.githubusercontent.com/TheFlagen430297/full-express-server/main/setup/examplePages/subdomain.js"
-    },
-    {
-        "fileName": "favicon.ico",
-        "id": "favicon",
-        "link": "https://raw.githubusercontent.com/TheFlagen430297/full-express-server/main/setup/examplePages/favicon.ico"
-    },
-    {
-        "fileName": "users.json",
-        "id": "users",
-        "link": "https://raw.githubusercontent.com/TheFlagen430297/full-express-server/main/setup/examplePages/users.json"
-    },
-    {
-        "fileName": "controls.js",
-        "id": "serverControls",
-        "link": "https://raw.githubusercontent.com/TheFlagen430297/full-express-server/main/setup/examplePages/serverControls.js"
-    }]
+    "ExamplePages": {
+        "main": [{
+            "fileName": "404.html",
+            "id": "404",
+            "link": "https://raw.githubusercontent.com/TheFlagen430297/full-express-server/main/setup/examplePages/404.html"
+        },
+        {
+            "fileName": "500.html",
+            "id": "500",
+            "link": "https://raw.githubusercontent.com/TheFlagen430297/full-express-server/main/setup/examplePages/500.html"
+        },
+        {
+            "fileName": "home.html",
+            "id": "home",
+            "link": "https://raw.githubusercontent.com/TheFlagen430297/full-express-server/main/setup/examplePages/home.html"
+        },
+        {
+            "fileName": "home.html",
+            "id": "adminPanel",
+            "link": "https://raw.githubusercontent.com/TheFlagen430297/full-express-server/main/setup/examplePages/adminPanel.html"
+        },
+        {
+            "fileName": "index.js",
+            "id": "subdomainAdmin.js",
+            "link": "https://raw.githubusercontent.com/TheFlagen430297/full-express-server/main/setup/examplePages/subdomain.js"
+        },
+        {
+            "fileName": "favicon.ico",
+            "id": "favicon",
+            "link": "https://raw.githubusercontent.com/TheFlagen430297/full-express-server/main/setup/examplePages/favicon.ico"
+        },
+        {
+            "fileName": "users.json",
+            "id": "users",
+            "link": "https://raw.githubusercontent.com/TheFlagen430297/full-express-server/main/setup/examplePages/users.json"
+        },
+        {
+            "fileName": "controls.js",
+            "id": "serverControls",
+            "link": "https://raw.githubusercontent.com/TheFlagen430297/full-express-server/main/setup/examplePages/serverControls.js"
+        }],
+        "dev": [{
+            "fileName": "404.html",
+            "id": "404",
+            "link": "https://raw.githubusercontent.com/TheFlagen430297/full-express-server/dev/setup/examplePages/404.html"
+        },
+        {
+            "fileName": "500.html",
+            "id": "500",
+            "link": "https://raw.githubusercontent.com/TheFlagen430297/full-express-server/dev/setup/examplePages/500.html"
+        },
+        {
+            "fileName": "home.html",
+            "id": "home",
+            "link": "https://raw.githubusercontent.com/TheFlagen430297/full-express-server/dev/setup/examplePages/home.html"
+        },
+        {
+            "fileName": "home.html",
+            "id": "adminPanel",
+            "link": "https://raw.githubusercontent.com/TheFlagen430297/full-express-server/dev/setup/examplePages/adminPanel.html"
+        },
+        {
+            "fileName": "index.js",
+            "id": "subdomainAdmin.js",
+            "link": "https://raw.githubusercontent.com/TheFlagen430297/full-express-server/dev/setup/examplePages/subdomain.js"
+        },
+        {
+            "fileName": "favicon.ico",
+            "id": "favicon",
+            "link": "https://raw.githubusercontent.com/TheFlagen430297/full-express-server/dev/setup/examplePages/favicon.ico"
+        },
+        {
+            "fileName": "users.json",
+            "id": "users",
+            "link": "https://raw.githubusercontent.com/TheFlagen430297/full-express-server/dev/setup/examplePages/users.json"
+        },
+        {
+            "fileName": "controls.js",
+            "id": "serverControls",
+            "link": "https://raw.githubusercontent.com/TheFlagen430297/full-express-server/dev/setup/examplePages/serverControls.js"
+        }]
+    }
 }
