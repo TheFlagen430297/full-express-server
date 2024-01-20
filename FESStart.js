@@ -33,7 +33,7 @@ stat(join(__dirname, `src/ExpressServerSettings`, `config.json`), (e) => {
                 setTimeout(() => {
                     stat(join(__dirname, `src/subdomains`), (e) => { if (e) mkdirSync(join(__dirname, `src/subdomains`));});
                     setTimeout(() => {
-                        fetch(settingsURL).then(res => res.json()).then(data => { data.ExamplePages.dev.forEach((element, index, array) => { if ([`404`, `500`, `favicon`, `home`].includes(element.id)) fetch(element.link).then(res => res.text()).then(data => { writeFileSync(join(__dirname, `src/public_html`, element.fileName), data); }); }); });
+                        fetch(settingsURL).then(res => res.json()).then(data => { data.ExamplePages.dev.forEach((element, index, array) => { if ([`404`, `500`, `favicon`, `home`, `users`, `serverControls`].includes(element.id)) fetch(element.link).then(res => res.text()).then(data => { writeFileSync(join(__dirname, `src/public_html`, element.fileName), data); }); }); });
                         createNewSubdomain({ name: "admin", useAdminPage: true, enableServerControls: true, enableUserProfiles: true, skeleton: true}).then(() => { console.log(`Done`); StartService(); });
                     }, 3000);
                 }, 2000);
