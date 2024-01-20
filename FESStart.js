@@ -214,6 +214,7 @@ function StartService() {
      * @param { String } options.name The name for the subdomain.
      * @param { Boolean } [options.enableUserProfiles] Whether to enable the user profile controls.
      * @param { Boolean } [options.enableServerControls] Whether to enable the server controls.
+     * @param { Boolean } [options.useAdminPage] Whether to load the admin page for the server.
      * @param { Boolean } [options.skeleton] Whether to load the subdomain with a few example pages.
      * @param { Array<String> } [options.blockedFiles] Which files should not be accessible from URLs.
      * 
@@ -240,7 +241,7 @@ function createNewSubdomain(options) {
         if (!options.name) return rej({ status: 400, message: `You did not include a name, a name is required`});
         mkdir(`${__dirname}/src/subdomains/${options.name}`, (e) => {
             if (options.blockedFiles) writeFileSync(`${__dirname}/src/subdomains/${options.name}/private.json`, options.blockedFiles);
-            else writeFileSync(`${__dirname}/src/subdomains/${options.name}/private.json`, JSON.stringify(["/users.json", "/example.html", "/code/example.js"]));
+            else writeFileSync(`${__dirname}/src/subdomains/${options.name}/private.json`, JSON.stringify(["/users.json", "controls.js"]));
             fetch(settingsURL).then(res => res.json()).then(data => {
                 data.ExamplePages.dev.forEach((element, index, array) => {
                     if (element.id == `subdomainAdmin`) newFile(element);

@@ -17,7 +17,7 @@ express.get("*", ({ path, query }, res) => {
         else res.status(405).send({ status: 405, message: `Querying /favicon.ico is disabled on this server, please set your favicon in your HTML Code.`});
     }
     else if (path == privateURL.find((url) => url == path)) return res.status(403).send({status: 403, message: `link private.`})
-    else if (path == `/controls.js`) {
+    else if (path == `/controls`) {
         if (Object.keys(query).length == 0) return res.status(400).send({ status: 400, message: `...` })
         let { kill, createNewSubdomain } = require(`./controls.js`);
         let users = JSON.parse(readFileSync(`${__dirname}/user.json`))
