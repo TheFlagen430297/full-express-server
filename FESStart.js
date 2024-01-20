@@ -1,7 +1,7 @@
 /**
  * # Full Express Server (FES)
  * ### FESStart.js
- * This script sets up a fully working express server packed with featu
+ * This script sets up a fully working express server packed with features.
  * 
  * All you have to do is place **FESStart.js** in the folder that you want it to be setup in and run `Node FESStart.js` in a terminal and it will set it all up for you :)
  */
@@ -31,7 +31,7 @@ stat(`./src/ExpressServerSettings/config.json`, (e) => {
                 setTimeout(() => {
                     stat(`./src/subdomains`, (e) => { if (e) mkdirSync(__dirname + `/src/subdomains`);});
                     setTimeout(() => {
-                        createNewSubdomain({ name: "admin", enableServerControls: true, enableUserProfiles: true, skeleton: true}).then(() => { console.log(`Done`); StartService(); })
+                        createNewSubdomain({ name: "admin", useAdminPage: true, enableServerControls: true, enableUserProfiles: true, skeleton: true}).then(() => { console.log(`Done`); StartService(); });
                     }, 3000);
                 }, 2000);
             }, 1000);
@@ -238,29 +238,33 @@ function StartService() {
 function createNewSubdomain(options) {
     let settingsURL = `https://raw.githubusercontent.com/TheFlagen430297/full-express-server/dev/setup/settings.json`;
     return new Promise((res, rej) => {
-        if (!options.name) return rej({ status: 400, message: `You did not include a name, a name is required`});
-        mkdir(`${__dirname}/src/subdomains/${options.name}`, (e) => {
-            if (options.blockedFiles) writeFileSync(`${__dirname}/src/subdomains/${options.name}/private.json`, options.blockedFiles);
-            else writeFileSync(`${__dirname}/src/subdomains/${options.name}/private.json`, JSON.stringify(["/users.json", "controls.js"]));
-            fetch(settingsURL).then(res => res.json()).then(data => {
-                data.ExamplePages.dev.forEach((element, index, array) => {
-                    if (element.id == `subdomainAdmin`) newFile(element);
-                    if (options.skeleton && [`404`, `500`, `home`, `favicon`].includes(element.id)) newFile(element);
-                    if (options.enableUserProfiles && element.id == `users`) newFile(element);
-                    if (options.enableServerControls && element.id == `serverControls`) newFile(element);
-                    if (index == array.length - 1) res()
+        if (!options.name) return rej({ status: 400, message: `name is required`});
+        stat(`${__dirname}/src/subdomains/${options.name}`, (e, stats) => {
+            if (!e) return rej({ status: 409, message: `subdomain already exists.`})
+            else mkdir(`${__dirname}/src/subdomains/${options.name}`, (e) => {
+                writeFileSync(`${__dirname}/src/subdomains/${options.name}/private.json`, JSON.stringify(["/users.json", "/controls.js", ...(options.blockedFiles || [])]));
+                fetch(settingsURL).then(res => res.json()).then(data => {
+                    data.ExamplePages.dev.forEach((element, index, array) => {
+                        if (options.useAdminPage && options.skeleton && element.id == `adminPanel`) newFile(element);
+                        else if (options.skeleton && element.id === `home`) newFile(element)
+                        if (element.id == `subdomainAdmin`) newFile(element);
+                        if (options.skeleton && [`404`, `500`, `favicon`].includes(element.id)) newFile(element);
+                        if (options.enableUserProfiles && element.id == `users`) newFile(element);
+                        if (options.enableServerControls && element.id == `serverControls`) newFile(element);
+                        if (index == array.length - 1) res();
+                    });
                 });
+    
+                /**
+                 * ### newFile();
+                 * 
+                 * Makes a new file.
+                 * 
+                 * @param { Object } element The file Object
+                 */
+                function newFile(element) { fetch(element.link).then(res => res.text()).then(data => { writeFileSync(`${__dirname}/src/subdomains/${options.name}/${element.fileName}`, data); }); }
             });
-
-            /**
-             * ### newFile();
-             * 
-             * Makes a new file.
-             * 
-             * @param { Object } element The URL of the file data
-             */
-            function newFile(element) { fetch(element.link).then(res => res.text()).then(data => { writeFileSync(`${__dirname}/src/subdomains/${options.name}/${element.fileName}`, data); }); }
-        });
+        })
     });
 }
 

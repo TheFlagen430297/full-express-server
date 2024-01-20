@@ -9,15 +9,14 @@ let ess = require(`../../ExpressServerSettings/config.json`);
 
 express.get("*", ({ path, query }, res) => {
     let privateURL = JSON.parse(readFileSync(`${__dirname}/private.json`));
-    if (path == `/favicon.ico`) { //? Browsers will make a url request for a favicon, so this allows you to decide whether you wish to give a favicon via a url request.
+    if (path == privateURL.find((url) => url == path)) return res.status(403).send({status: 403, message: `link private.`})
+    else if (path == `/favicon.ico`) { //? Browsers will make a url request for a favicon, so this allows you to decide whether you wish to give a favicon via a url request.
         //[TheFlagen430297] Browsers requesting the favicon via a url request is stupid, it is not recommended and it is recommended to set your favicon in your HTML code.
         //[TheFlagen430297] But, you can change this in "./src/ExpressServerSettings/config.json"
         //[TheFlagen430297] If you use this method, you need to have a image file called "favicon.ico" in "./src/public_html" and in any subdomains.
         if (ess.useFaviconRequest) stat(`${__dirname}/favicon.ico`, (e) => e ? res.status(404).send({ status: 404, message: `Ohh okay, odd... The favicon.ico couldn't be found.`}) : res.status(200).sendFile(`${__dirname}/favicon.ico`))
         else res.status(405).send({ status: 405, message: `Querying /favicon.ico is disabled on this server, please set your favicon in your HTML Code.`});
-    }
-    else if (path == privateURL.find((url) => url == path)) return res.status(403).send({status: 403, message: `link private.`})
-    else if (path == `/controls`) {
+    } else if (path == `/controls`) {
         if (Object.keys(query).length == 0) return res.status(400).send({ status: 400, message: `...` })
         let { kill, createNewSubdomain } = require(`./controls.js`);
         let users = JSON.parse(readFileSync(`${__dirname}/user.json`))
