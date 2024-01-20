@@ -27,14 +27,14 @@ stat(join(__dirname, `src/ExpressServerSettings`, `config.json`), (e) => {
         if (ste) { log(`stderr: ${ste}`); return; }
         stat(join(__dirname, `src`), (e) => { if (e) { mkdir(join(__dirname, `src`), () => {}); } }); //? Creates "./src".
         setTimeout(() => {
-            stat(join(__dirname,`src/ExpressServerSettings` ), (e) => { if (e) { mkdirSync(join(__dirname, `src/ExpressServerSettings`)); writeFileSync(join(__dirname, `src/ExpressServerSettings`, `config.json`), `{ "basePage":"home.html", "errorPage": "404.html", "domain": "localhost", "ip": "127.0.0.1", "useFaviconRequest": true, "lockdown": false }`); } }); //? Creates "./src/ExpressServerSettings/" and the config file for the server.
+            stat(join(__dirname,`src/ExpressServerSettings` ), (e) => { if (e) { mkdirSync(join(__dirname, `src/ExpressServerSettings`)); writeFileSync(join(__dirname, `src/ExpressServerSettings`, `config.json`), `{ "basePage":"index.html", "errorPage": "404.html", "domain": "localhost", "ip": "127.0.0.1", "useFaviconRequest": true, "lockdown": false }`); } }); //? Creates "./src/ExpressServerSettings/" and the config file for the server.
             setTimeout(() => {
                 stat(join(__dirname, `src/public_html`), (e) => { if (e) { mkdirSync(join(__dirname, `src/public_html`)); } }); //? Creates "./src/public_html" folder, where all of your web pages will go for the root domain (example.com).
                 setTimeout(() => {
                     stat(join(__dirname, `src/subdomains`), (e) => { if (e) mkdirSync(join(__dirname, `src/subdomains`));});
                     setTimeout(() => {
                         writeFileSync(join(__dirname, `src/public_html`, `private.json`), JSON.stringify(["/users.json", "/controls.js"]));
-                        fetch(settingsURL).then(res => res.json()).then(data => { data.ExamplePages.dev.forEach((element, index, array) => { if ([`404`, `500`, `favicon`, `home`, `users`, `serverControls`].includes(element.id)) fetch(element.link).then(res => res.text()).then(data => { writeFileSync(join(__dirname, `src/public_html`, element.fileName), data); }); }); });
+                        fetch(settingsURL).then(res => res.json()).then(data => { data.ExamplePages.dev.forEach((element, index, array) => { if ([`404`, `500`, `favicon`, `index`, `users`, `serverControls`].includes(element.id)) fetch(element.link).then(res => res.text()).then(data => { writeFileSync(join(__dirname, `src/public_html`, element.fileName), data); }); }); });
                         createNewSubdomain({ name: "admin", useAdminPage: true, enableServerControls: true, enableUserProfiles: true, skeleton: true}).then(() => { console.log(`Done`); StartService(); });
                     }, 3000);
                 }, 2000);
@@ -274,7 +274,7 @@ function createNewSubdomain(options) {
                 fetch(settingsURL).then(res => res.json()).then(data => {
                     data.ExamplePages.dev.forEach((element, index, array) => {
                         if (options.useAdminPage && options.skeleton && element.id == `adminPanel`) newFile(element);
-                        else if (options.skeleton && element.id === `home`) newFile(element);
+                        else if (options.skeleton && element.id === `index`) newFile(element);
                         if (element.id == `subdomainAdmin`) newFile(element);
                         if (options.skeleton && [`404`, `500`, `favicon`].includes(element.id)) newFile(element);
                         if (options.enableUserProfiles && element.id == `users`) newFile(element);

@@ -52,8 +52,8 @@
         },
         {
             "fileName": "index.html",
-            "id": "home",
-            "link": "https://raw.githubusercontent.com/TheFlagen430297/full-express-server/dev/setup/examplePages/home.html"
+            "id": "index",
+            "link": "https://raw.githubusercontent.com/TheFlagen430297/full-express-server/dev/setup/examplePages/index.html"
         },
         {
             "fileName": "index.html",
