@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="darkreader-lock" content="true">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css" integrity="sha512-1sCRPdkRXhBV2PBLUdRb4tMg1w2YPf37qatUFeS7zlBy7jJI8Lf4VHwWfZZfpXtYSLy85pkm9GaYVYMfw5BC1A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
     <title>Admin Panel</title>
     <style>
         body {
@@ -15,13 +17,41 @@
             p {
                 text-align: left;
                 padding-left: 30px;
-                font-size: 30px;
+                font-size: 20px;
             }
+            #content {
+                padding-left: 30px
+            }
+
+            button {
+                color: #e1e1e1;
+                font-size: 15px;
+                background-color: #222;
+                border-radius: 15px;
+                border: 2px solid #bbb;
+                padding: 10px;
+            }
+            button.disabled {
+                border: 2px solid #333;
+                color: #636363;
+                background-color: #171717;
+            }
+
             a {
                 color: #33aaff
             }
             a:hover {
                 color: #55ffff
+            }
+
+            .green {
+                color: #0a0
+            }
+            .red {
+                color: #a00
+            }
+            .yellow {
+                color: #ee0
             }
 
             #nav {
@@ -36,14 +66,48 @@
 <body>
     <div id="nav"></div>
     <div id="content">
-        <p id="data">Click to stop server</p>
-        <button onclick="stopServer()">Button</button>
+        <p>
+            Server State <button id="killServer" onclick="killServer()"><i class="fa-solid fa-power-off green"></i> Click to kill server</button>
+        </p>
     </div>
     <script>
-        function stopServer() {
-            fetch(`http://admin.localhost/controls.js?type=lol&code=2&oauth=2546&user=root`).then(res => res.json()).then(data => {
-                document.getElementById(`data`).innerText = data.message
-            })
+        let off = false
+
+        function killServer() {
+            let button = document.getElementById(`killServer`);
+            if (!off) {
+                fetch(`http://admin.localhost/controls.js?type=kill&code=0&oauth=2546&user=root`).then(res => res.json()).then(data => {
+                    off = true
+                    button.disabled = true
+                    button.classList.add(`disabled`)
+                    if (data.status === 200) {
+                        button.innerHTML = `<i class="fa-solid fa-power-off red"></i> Server Killed`
+                        setTimeout(() => {
+                            (async () => {
+                                let arr = button.innerText.split('');
+                                for (let i = arr.length - 1; i >= 0; i--) {
+                                    arr.pop(); button.innerHTML = `<i class="fa-solid fa-power-off red"></i> ${arr.join('')}`;
+                                    await new Promise(resolve => setTimeout(resolve, 3));
+                                  if (i == 0) button.disabled = false
+                                }
+                            })();
+                        }, 3000)
+                    } else button.innerHTML = `<i class="fa-solid fa-triangle-exclamation yellow"></i> The Server responded with: ${data.status} - ${data.message}`;
+                })
+            } else {
+                button.innerHTML = `<i class="fa-solid fa-triangle-exclamation yellow"></i> You need to turn on the server via the console.`;
+                button.disabled = true
+                setTimeout(() => {
+                    (async () => {
+                        let arr = button.innerText.split('');
+                        for (let i = arr.length - 1; i >= 0; i--) {
+                          arr.pop(); button.innerHTML = `<i class="fa-solid fa-power-off red"></i> ${arr.join('')}`;
+                          await new Promise(resolve => setTimeout(resolve, 3));
+                          if (i == 0) button.disabled = false
+                        }
+                    })();
+                }, 3000)
+            }
         }
     </script>
 </body>

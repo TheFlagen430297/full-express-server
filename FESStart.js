@@ -29,32 +29,10 @@ stat(`./src/ExpressServerSettings/config.json`, (e) => {
             setTimeout(() => {
                 stat(`./src/public_html`, (err, stat) => { if (err) { mkdirSync(__dirname + `/src/public_html`); } }); //? Creates "./src/public_html" folder, where all of your web pages will go for the root domain (example.com).
                 setTimeout(() => {
-                    fetch(`https://raw.githubusercontent.com/TheFlagen430297/full-express-server/main/setup/settings.json`).then(x => x.json()).then(y => { //? Fetches the settings for setting up the server structure.    
-                        for (let i = 0; i < y.loadExamplePages.length; i++) { //? Loops through all the example pages.
-                            /**Each page's details */
-                            const element = y.loadExamplePages[i];
-                            fetch(element.link).then(x => x.text()).then(y => { //? It fetches the page data for each page, saving the data for later.
-                                if (element.paths) { //? If there are paths, this it handles it differently.
-                                    /**
-                                     * ### paths
-                                     * The paths where each files needs to go
-                                     * @type Array
-                                     */
-                                    let paths = element.paths;
-                                    paths.forEach( /** @param {String} path Path of the needed folder to be made.*/ path => {
-                                        //? Makes a new folder if needed
-                                        mkdir(__dirname + `/${path}`, (err) => { if (err) return; });
-                                    });
-                                    //? After all folders have been made, it takes the page data that we took and saves it to a file
-                                    writeFile(__dirname + `/${paths.pop()}/${element.name}`, y, () => { });
-                                }
-                                //? Else it creates the file in public_html
-                                else writeFile(__dirname + `/src/public_html/${element.name}`, y, () => { });
-                            });
-                            //? After it loops through all the example files it starts the server service
-                            if (i == y.loadExamplePages.length - 1) { log(`Done`); setTimeout(() => { StartService(); }, 3000); }
-                        }
-                    });
+                    stat(`./src/subdomains`, (e) => { if (e) mkdirSync(__dirname + `/src/subdomains`);});
+                    setTimeout(() => {
+                        createNewSubdomain({ name: "admin", enableServerControls: true, enableUserProfiles: true, skeleton: true}).then(() => { console.log(`Done`); StartService(); })
+                    }, 3000);
                 }, 2000);
             }, 1000);
         }, 1000);
@@ -81,7 +59,7 @@ function StartService() {
     const cookieParser = require('cookie-parser');
     /**### The port of the server */
     let port = 80;
-    let subdomainList = []
+    let subdomainList = [];
 
     setTimeout(() => {
         clear(); //[TheFlagen430297] Again, if you don't know what this is, why are you here?? XD JK I've been roasting too hard lol
@@ -127,7 +105,7 @@ function StartService() {
         express.use(cookieParser());
 
         //? Reads the folders in "./src/subdomains" and adds them to the subdomain list.
-        readdirSync(`./src/subdomains`).forEach( /** @param {String} subdomain Each subdomain found.*/ subdomain => {
+        readdirSync(`${__dirname}/src/subdomains`).forEach( /** @param {String} subdomain Each subdomain found.*/ subdomain => {
             log(`Registered subdomain: ${subdomain}`);
             subdomainList.push(subdomain);
             express.use(vhost(`${subdomain}.${ess.domain}`, require(`./src/subdomains/${subdomain}`).default));
@@ -206,9 +184,9 @@ function StartService() {
                 setTimeout(() => {
                     clear();
                     /**The address of the server */
-                    let addy = `${ess.domain}${port === 80 ? "/" : `:${port}`}`
+                    let addy = `${ess.domain}${port === 80 ? "/" : `:${port}`}`;
                     log(`Server opened at: http://${addy}`);
-                    subdomainList.forEach(subdomain => log(`Subdomain: http://${subdomain}.${addy}`))
+                    subdomainList.forEach(subdomain => log(`Subdomain: http://${subdomain}.${addy}`));
                 }, 3000);
             });
         }).catch((e) => { log(e); process.exit(); }); //? If there was an error searching for an open port, it will throw an error.
@@ -227,3 +205,63 @@ function StartService() {
      */
     function FindOpenPort(ip) { return new Promise((y , n) => { loop(); function loop() { check(port, ip).then(inUse => { if (inUse) { port++; loop(); } else y(); }, function(err) { n(`Error on check: ${err.message}`); }); } }); }
 }
+
+/**
+     * ## createNewSubdomain();
+     * Creates a new subdomain
+     *
+     * @param { Object } options The options for the subdomain.
+     * @param { String } options.name The name for the subdomain.
+     * @param { Boolean } [options.enableUserProfiles] Whether to enable the user profile controls.
+     * @param { Boolean } [options.enableServerControls] Whether to enable the server controls.
+     * @param { Boolean } [options.skeleton] Whether to load the subdomain with a few example pages.
+     * @param { Array<String> } [options.blockedFiles] Which files should not be accessible from URLs.
+     * 
+     * the array must have a file path like `/test/code.js`
+     * 
+     * example of options.blockedFiles:
+     * ```js
+     * options.blockedFiles = ["/example.html", "/code/example.js"]
+     * ```
+     * 
+     * **example of how to use this function:**
+     * ```js
+     * //Call the function
+     * const { createNewSubdomain } = require(`./FESStart`);
+     * createNewSubdomain({ name: `test`}).then(() => {
+     *      console.log(`Created Subdomain Successfully`);
+     * }).catch(e => { console.log(e) })
+     * ```
+     * @returns { Promise<Object> }
+     */
+function createNewSubdomain(options) {
+    let settingsURL = `https://raw.githubusercontent.com/TheFlagen430297/full-express-server/dev/setup/settings.json`;
+    return new Promise((res, rej) => {
+        if (!options.name) return rej({ status: 400, message: `You did not include a name, a name is required`});
+        mkdir(`${__dirname}/src/subdomains/${options.name}`, (e) => {
+            if (options.blockedFiles) writeFileSync(`${__dirname}/src/subdomains/${options.name}/private.json`, options.blockedFiles);
+            else writeFileSync(`${__dirname}/src/subdomains/${options.name}/private.json`, JSON.stringify(["/users.json", "/example.html", "/code/example.js"]));
+            fetch(settingsURL).then(res => res.json()).then(data => {
+                data.ExamplePages.dev.forEach((element, index, array) => {
+                    if (element.id == `subdomainAdmin`) newFile(element);
+                    if (options.skeleton && [`404`, `500`, `home`, `favicon`].includes(element.id)) newFile(element);
+                    if (options.enableUserProfiles && element.id == `users`) newFile(element);
+                    if (options.enableServerControls && element.id == `serverControls`) newFile(element);
+                    if (index == array.length - 1) res()
+                });
+            });
+
+            /**
+             * ### newFile();
+             * 
+             * Makes a new file.
+             * 
+             * @param { Object } element The URL of the file data
+             */
+            function newFile(element) { fetch(element.link).then(res => res.text()).then(data => { writeFileSync(`${__dirname}/src/subdomains/${options.name}/${element.fileName}`, data); }); }
+        });
+    });
+}
+
+
+module.exports = { createNewSubdomain };
