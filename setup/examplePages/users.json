@@ -1,0 +1,8 @@
+[
+    {
+        "name": "root",
+        "password": "FESAdminPlzChange",
+        "oauth": 0,
+        "permissions": ["kill", "administrator"]
+    }
+]
