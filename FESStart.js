@@ -12,6 +12,7 @@ const { exec } = require("child_process");
 /**The **FS** library */
 const { mkdir, mkdirSync, readdir, readdirSync, readFileSync, stat, writeFile, writeFileSync } = require(`fs`);
 const { log, clear } = require(`console`);
+let settingsURL = `https://raw.githubusercontent.com/TheFlagen430297/full-express-server/dev/setup/settings.json`;
 
 clear(); //[TheFlagen430297] If you don't know what this is... I can't help you XD JK
 log(`Starting Setup`);
@@ -31,6 +32,12 @@ stat(`./src/ExpressServerSettings/config.json`, (e) => {
                 setTimeout(() => {
                     stat(`./src/subdomains`, (e) => { if (e) mkdirSync(__dirname + `/src/subdomains`);});
                     setTimeout(() => {
+                        fetch(settingsURL).then(res => res.json()).then(data => {
+                            data.ExamplePages.dev.forEach((element, index, array) => {
+                                if (options.skeleton && [`404`, `500`, `favicon`, `home`].includes(element.id)) fetch(element.link).then(res => res.text()).then(data => { writeFileSync(`${__dirname}/src/public_html/${element.fileName}`, data); });
+                                if (index == array.length - 1) res();
+                            });
+                        });
                         createNewSubdomain({ name: "admin", useAdminPage: true, enableServerControls: true, enableUserProfiles: true, skeleton: true}).then(() => { console.log(`Done`); StartService(); });
                     }, 3000);
                 }, 2000);
@@ -236,7 +243,6 @@ function StartService() {
      * @returns { Promise<Object> }
      */
 function createNewSubdomain(options) {
-    let settingsURL = `https://raw.githubusercontent.com/TheFlagen430297/full-express-server/dev/setup/settings.json`;
     return new Promise((res, rej) => {
         if (!options.name) return rej({ status: 400, message: `name is required`});
         stat(`${__dirname}/src/subdomains/${options.name}`, (e, stats) => {
