@@ -25,7 +25,7 @@ express.get("*", ({ path, query }, res) => {
                 let { kill } = require(join(__dirname, `controls.js`));
                 stat(join(__dirname, `users.json`), (e) => {
                     if (e) return res.status(404).send({ status: 404, message: `users not found.`});
-                    let users = JSON.parse(readFileSync(join(__dirname, `user.json`)));
+                    let users = JSON.parse(readFileSync(join(__dirname, `users.json`)));
                     if (query.type === `kill`) {
                         if (!Object.keys(query).includes(`oauth`)) return res.status(400).send({ status: 400, message: `missing oauth param.` });
                         if (!Object.keys(query).includes(`user`)) return res.status(400).send({ status: 400, message: `missing user param.` });
