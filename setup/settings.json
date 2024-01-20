@@ -51,12 +51,12 @@
             "link": "https://raw.githubusercontent.com/TheFlagen430297/full-express-server/dev/setup/examplePages/500.html"
         },
         {
-            "fileName": "home.html",
+            "fileName": "index.html",
             "id": "home",
             "link": "https://raw.githubusercontent.com/TheFlagen430297/full-express-server/dev/setup/examplePages/home.html"
         },
         {
-            "fileName": "home.html",
+            "fileName": "index.html",
             "id": "adminPanel",
             "link": "https://raw.githubusercontent.com/TheFlagen430297/full-express-server/dev/setup/examplePages/adminPanel.html"
         },
