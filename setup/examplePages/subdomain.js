@@ -1,5 +1,5 @@
 const express = require("express")();
-const { stat, readFileSync } = require(`fs`);
+const { stat, readFileSync, fstat } = require(`fs`);
 const { log } = require(`console`);
 const { join } = require(`path`);
 const cookieParser = require('cookie-parser');
@@ -44,15 +44,21 @@ express.get("*", ({ path, query }, res) => {
             })
         } else stat(join(__dirname, path), (e) => { //? Checks to see if the files exist for the request
             //TODO: Use "e" to see why it errored, and respond more correctly.
-            if (e) return error(404); //? If the file does not exist, then throw error
-            else if (path == "/") { //? If there are no params on the request, then treats it differently.
+            if (path == "/") { //? If there are no params on the request, then treats it differently.
                 //? Checks to see if the basePage exists.
                 stat(join(__dirname, ess.basePage), (e) => {
                     //TODO: Use "e" to see why it errored, and respond more correctly.
                     if (e) return error(404); //? The file does not exist or there was an error.
                     else res.status(200).sendFile(join(__dirname, ess.basePage));
                 });
-            } else res.status(200).sendFile(join(__dirname, path)); //? The file exists and will send.
+            } else {
+                stat(join(__dirname, path), (e) => {
+                    if (e) stat(join(__dirname, path + ".html"), (e) => {
+                        if (e) return error(404); //? If the file does not exist, then throw error
+                        res.status(200).sendFile(join(__dirname, path + ".html"))
+                    })
+                })
+            }
         });
     });
 

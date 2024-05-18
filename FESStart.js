@@ -185,14 +185,14 @@ function StartService() {
             function error(type) {
                 if (type == 404) stat(join(__dirname, `src/public_html`, ess.errorPage), (e) => { //? Checks to see if the error page is available, if not, then trow an error and respond to the client.
                     if (e) {
-                        log(`The page for Status Code 404 could not be found. Make sure it exist at the path in the config.`);
+                        log(`The page for Status Code 404 could not be found. Make sure it exist at the path in the config.\nThis could also be coming from one of the domains.`);
                         res.status(404).send({ status: 404, message: `Wow... The 404 page couldn't be found, neither could the page that you are looking for. Both are 404 Not Found.`} );
                     }
                     else res.status(404).sendFile(join(__dirname, `src/public_html`, ess.errorPage));
                 });
                 else if (type == 500) stat(join(__dirname, `src/public_html`, ess.internalErrorPage), (e) => { //? Checks to see if the internal server error page is available, if not, then trow an error and respond to the client.
                     if (e) {
-                        log(`The page for Status Code 500 could not be found. Make sure it exist at the path in the config.`);
+                        log(`The page for Status Code 500 could not be found. Make sure it exist at the path in the config.\nThis could also be coming from one of the domains.`);
                         res.status(404).send({ status: 404, message: `A lot of errors today I see... The 500 page can't be found. Besides that error, another internal server error happened (Status code: 500)`});
                     } else res.status(500).sendFile(join(__dirname, `src/public_html`, ess.internalErrorPage));
                 });
@@ -216,6 +216,9 @@ function StartService() {
                     /**The address of the server */
                     let addy = `${ess.domain}${port === 80 ? "/" : `:${port}`}`;
                     log(`Server opened at: http://${addy}`); subdomainList.forEach(subdomain => log(`Subdomain: http://${subdomain}.${addy}`));
+                    setTimeout(() => {
+                        if (ess.domain == "localhost") log(`\nNOTE: domain is set to "localhost", you won't be able to use domains if this server is being broadcasted to the internet.\nIn order to use domains, you must edit the domain property to "YourDomain.com" in the config!`)
+                    }, 1000)
                 }, 3000);
             });
         }).catch((e) => { log(e); process.exit(); }); //? If there was an error searching for an open port, it will throw an error.
