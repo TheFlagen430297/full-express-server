@@ -123,7 +123,7 @@ function StartService() {
             //? Reads the subdomains and returns a list of them.
             //! The folder names are the subdomain names, if you want "admin.example.com" the folder name must be "admin"
             readdir(join(__dirname, `src/subdomains`), (e, folders) => {
-                let rex = /(.*)\..*/;
+                let rex = /([a-z]*)(?:\.)(.*\..*)/;
                 if (rex.test(hostname)) { //? Checks if there is a subdomain in the request url, if not, then treats it as on the domain.
                     let check = rex.exec(hostname)[1];
                     if (!folders.find( x => x == check)) return res.status(404).send({ status: 404, message: `The subdomain "${check}" does not exist on this server`}); //? If the subdomain does not exist on the server, returns 404 with message.
