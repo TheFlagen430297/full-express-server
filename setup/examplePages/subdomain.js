@@ -8,7 +8,8 @@ express.use(cookieParser());
 
 let ess = require(`../../ExpressServerSettings/config.json`);
 
-express.get("/*", ({ path, query }, res) => {
+express.use((req, res) => {
+    const { path, query } = req;
     stat(join(__dirname, `private.json`), (e) => {
         if (!e) privateURL = JSON.parse(readFileSync(join(__dirname, `private.json`)));
         if (!e && path == privateURL.find((url) => url == path)) return res.status(403).send({status: 403, message: `link private.`});
