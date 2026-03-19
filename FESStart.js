@@ -115,7 +115,7 @@ function StartService() {
             express.use(vhost(`${subdomain}.${ess.domain}`, require(join(__dirname, `src/subdomains/${subdomain}`)).default));
         });
         //? Listens for any calls to the server.
-        express.get(`*`, ({ hostname, path }, res) => {
+        express.get(({ hostname, path }, res) => {
             ess = JSON.parse(readFileSync(join(__dirname, `src/ExpressServerSettings`, `config.json`)));
             //! If lockdown is true then it will throw out all requests to the server.
             if (ess.lockdown) { res.status(418).send({ status: 418, message: `I'm stoopid :P (I'm a teapot)`}); console.log(`a request was stopped due to being in Lockdown`); return; }
