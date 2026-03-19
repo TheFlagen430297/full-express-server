@@ -13,6 +13,8 @@ const { exec } = require("child_process");
 const { mkdir, mkdirSync, readdir, readdirSync, readFileSync, stat, writeFile, writeFileSync } = require(`fs`);
 const { log, clear } = require(`console`);
 const { join } = require("path");
+
+// Change the "dev" to "main" if you want the most stable version.
 let settingsURL = `https://raw.githubusercontent.com/TheFlagen430297/full-express-server/dev/setup/settings.json`;
 
 clear(); //[TheFlagen430297] If you don't know what this is... I can't help you XD JK
@@ -27,7 +29,7 @@ stat(join(__dirname, `src/ExpressServerSettings`, `config.json`), (e) => {
         if (ste) { log(`stderr: ${ste}`); return; }
         stat(join(__dirname, `src`), (e) => { if (e) { mkdir(join(__dirname, `src`), () => {}); } }); //? Creates "./src".
         setTimeout(() => {
-            stat(join(__dirname,`src/ExpressServerSettings` ), (e) => { if (e) { mkdirSync(join(__dirname, `src/ExpressServerSettings`)); writeFileSync(join(__dirname, `src/ExpressServerSettings`, `config.json`), `{ "basePage":"index.html", "errorPage": "404.html", "domain": "localhost", "ip": "127.0.0.1", "useFaviconRequest": true, "lockdown": false }`); } }); //? Creates "./src/ExpressServerSettings/" and the config file for the server.
+            stat(join(__dirname,`src/ExpressServerSettings` ), (e) => { if (e) { mkdirSync(join(__dirname, `src/ExpressServerSettings`)); writeFileSync(join(__dirname, `src/ExpressServerSettings`, `config.json`), `{ "basePage":"index.html", "errorPage": "404.html", "domain": "localhost", "ip": "127.0.0.1", "setPort": null, "useFaviconRequest": true, "lockdown": false }`); } }); //? Creates "./src/ExpressServerSettings/" and the config file for the server.
             setTimeout(() => {
                 stat(join(__dirname, `src/public_html`), (e) => { if (e) { mkdirSync(join(__dirname, `src/public_html`)); } }); //? Creates "./src/public_html" folder, where all of your web pages will go for the root domain (example.com).
                 setTimeout(() => {
@@ -62,8 +64,8 @@ function StartService() {
     /**The **cookieParser** library*/
     const cookieParser = require('cookie-parser');
     /**### The port of the server */
-    let port = 80;
-    let subdomainList = [];
+    let defaultPort = 80
+    let subdomainList = [];;
 
     setTimeout(() => {
         clear(); //[TheFlagen430297] Again, if you don't know what this is, why are you here?? XD JK I've been roasting too hard lol
@@ -91,6 +93,13 @@ function StartService() {
          * The **IPv4** address of the server, it should never need to be changed, but can be if needed.
          * 
          * Defaults to *`127.0.0.1`* in `./src/ExpressServerSettings/config.json`
+         * @property { number|null } ess.setPort The set port for the server.
+         * 
+         * You can set the port of the server, however, if there is another service using that port, it will error out.
+         * 
+         * If set to `null` it will find a open port closest to port 80.
+         * 
+         * Defaults to *`null`* in `./src/ExpressServerSettings/config.json`
          * @property { Boolean } ess.useFaviconRequest Whether or not to use the Favicon URL Request method.
          * 
          * *It is not recommended to use the Favicon URL Request method because it is better to put it in your [HTML Code](https://www.w3schools.com/html/html_favicon.asp 'View how to at: https://www.w3schools.com/html/html_favicon.asp')*
@@ -107,7 +116,6 @@ function StartService() {
         /**@type {ess} */
         let ess = JSON.parse(readFileSync(`./src/ExpressServerSettings/config.json`));
         express.use(cookieParser());
-
         //? Reads the folders in "./src/subdomains" and adds them to the subdomain list.
         readdirSync(join(__dirname, `src/subdomains`)).forEach( /** @param {String} subdomain Each subdomain found.*/ subdomain => {
             log(`Registered subdomain: ${subdomain}`);
@@ -118,6 +126,10 @@ function StartService() {
         express.use((req, res) => {
             const { hostname, path } = req;
             ess = JSON.parse(readFileSync(join(__dirname, `src/ExpressServerSettings`, `config.json`)));
+
+            //! If the hostname does not match the domain set, it is stopped.
+            if (hostname != ess.domain) { res.status(403).send({ status: 403, message: `The hostname (${hostname}) did not match the set domain (${ess.domain}) in this server. This is common when trying to directly connect to the server's IP and not it's set up domain.`}); return; }
+
             //! If lockdown is true then it will throw out all requests to the server.
             if (ess.lockdown) { res.status(418).send({ status: 418, message: `I'm stoopid :P (I'm a teapot)`}); console.log(`a request was stopped due to being in Lockdown`); return; }
 
@@ -211,11 +223,11 @@ function StartService() {
         });
 
         FindOpenPort(ess.ip).then(() => {
-            createServer(express).listen(port).on(`listening`, () => { //? Creates the server and opens it.
+            createServer(express).listen(ess.setPort ? ess.setPort : 80).on(`listening`, () => { //? Creates the server and opens it.
                 setTimeout(() => {
                     clear();
                     /**The address of the server */
-                    let addy = `${ess.domain}${port === 80 ? "/" : `:${port}`}`;
+                    let addy = `${ess.domain}${ess.setPort ? `:${ess.setPort}/` : "/"}`;
                     log(`Server opened at: http://${addy}`); subdomainList.forEach(subdomain => log(`Subdomain: http://${subdomain}.${addy}`));
                     setTimeout(() => {
                         if (ess.domain == "localhost") log(`\nNOTE: domain is set to "localhost", you won't be able to use domains if this server is being broadcasted to the internet.\nIn order to use domains, you must edit the domain property to "YourDomain.com" in the config!`)
@@ -236,7 +248,7 @@ function StartService() {
      * @param { String } ip The IP that you want to check for an open port.
      * @returns { Promise<string>|void}
      */
-    function FindOpenPort(ip) { return new Promise((y , n) => { loop(); function loop() { check(port, ip).then(inUse => { if (inUse) { port++; loop(); } else y(); }, function(err) { n(`Error on check: ${err.message}`); }); } }); }
+    function FindOpenPort(ip) { return new Promise((y , n) => { loop(); function loop() { check(defaultPort, ip).then(inUse => { if (inUse) { defaultPort++; loop(); } else y(); }, function(err) { n(`Error on check: ${err.message}`); }); } }); }
 }
 
 /**
