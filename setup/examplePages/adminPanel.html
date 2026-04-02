@@ -66,9 +66,7 @@
 <body>
     <div id="nav"></div>
     <div id="content">
-        <p>
-            Server State <button id="killServer" onclick="killServer()"><i class="fa-solid fa-power-off green"></i> Click to kill server</button>
-        </p>
+        <p> Server State <button id="killServer" onclick="killServer()"><i class="fa-solid fa-power-off green"></i> Click to kill server</button> </p>
     </div>
     <script>
         let off = false
@@ -76,7 +74,7 @@
         function killServer() {
             let button = document.getElementById(`killServer`);
             if (!off) {
-                fetch(`http://admin.localhost/controls.js?type=kill&code=0&oauth=2546&user=root`).then(res => res.json()).then(data => {
+                fetch(`http://admin.localhost/controls?type=kill&code=0&oauth=2546&user=root`).then(res => res.json()).then(data => {
                     off = true
                     button.disabled = true
                     button.classList.add(`disabled`)

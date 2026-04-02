@@ -1,15 +1,13 @@
 const express = require("express")();
-const { stat, readFileSync } = require(`fs`);
+const { stat, readFileSync, fstat } = require(`fs`);
 const { log } = require(`console`);
 const { join } = require(`path`);
-const cookieParser = require('cookie-parser');
-
-express.use(cookieParser());
-
-let ess = require(`../../ExpressServerSettings/config.json`);
+express.use(require('cookie-parser')());
 
 express.use((req, res) => {
-    const { path, query } = req;
+    let ess = require(`../../ExpressServerSettings/config.json`);
+    if (ess.lockdown) { res.status(418).json({ errorTitle: `I'm stoopid :P (I'm a teapot)`, message: `All server requests are ignored due to being in Lockdown`, status: 418 }); log(`A request was stopped due to being in Lockdown, time: ${Date.now()}`, { type: `Warning` }); return;}
+    const { path, query } = req
     stat(join(__dirname, `private.json`), (e) => {
         if (!e) privateURL = JSON.parse(readFileSync(join(__dirname, `private.json`)));
         if (!e && path == privateURL.find((url) => url == path)) return res.status(403).send({status: 403, message: `link private.`});
@@ -26,7 +24,7 @@ express.use((req, res) => {
                 let { kill } = require(join(__dirname, `controls.js`));
                 stat(join(__dirname, `users.json`), (e) => {
                     if (e) return res.status(404).send({ status: 404, message: `users not found.`});
-                    let users = JSON.parse(readFileSync(join(__dirname, `user.json`)));
+                    let users = JSON.parse(readFileSync(join(__dirname, `users.json`)));
                     if (query.type === `kill`) {
                         if (!Object.keys(query).includes(`oauth`)) return res.status(400).send({ status: 400, message: `missing oauth param.` });
                         if (!Object.keys(query).includes(`user`)) return res.status(400).send({ status: 400, message: `missing user param.` });
@@ -45,15 +43,21 @@ express.use((req, res) => {
             })
         } else stat(join(__dirname, path), (e) => { //? Checks to see if the files exist for the request
             //TODO: Use "e" to see why it errored, and respond more correctly.
-            if (e) return error(404); //? If the file does not exist, then throw error
-            else if (path == "/") { //? If there are no params on the request, then treats it differently.
+            if (path == "/") { //? If there are no params on the request, then treats it differently.
                 //? Checks to see if the basePage exists.
                 stat(join(__dirname, ess.basePage), (e) => {
                     //TODO: Use "e" to see why it errored, and respond more correctly.
                     if (e) return error(404); //? The file does not exist or there was an error.
                     else res.status(200).sendFile(join(__dirname, ess.basePage));
                 });
-            } else res.status(200).sendFile(join(__dirname, path)); //? The file exists and will send.
+            } else {
+                stat(join(__dirname, path), (e) => {
+                    if (e) stat(join(__dirname, path + ".html"), (e) => {
+                        if (e) return error(404); //? If the file does not exist, then throw error
+                        res.status(200).sendFile(join(__dirname, path + ".html"))
+                    })
+                })
+            }
         });
     });
 
