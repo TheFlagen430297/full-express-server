@@ -2,13 +2,11 @@ const express = require("express")();
 const { stat, readFileSync, fstat } = require(`fs`);
 const { log } = require(`console`);
 const { join } = require(`path`);
-const cookieParser = require('cookie-parser');
-
-express.use(cookieParser());
-
-let ess = require(`../../ExpressServerSettings/config.json`);
+express.use(require('cookie-parser')());
 
 express.use((req, res) => {
+    let ess = require(`../../ExpressServerSettings/config.json`);
+    if (ess.lockdown) { res.status(418).json({ errorTitle: `I'm stoopid :P (I'm a teapot)`, message: `All server requests are ignored due to being in Lockdown`, status: 418 }); log(`A request was stopped due to being in Lockdown, time: ${Date.now()}`, { type: `Warning` }); return;}
     const { path, query } = req
     stat(join(__dirname, `private.json`), (e) => {
         if (!e) privateURL = JSON.parse(readFileSync(join(__dirname, `private.json`)));

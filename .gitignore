@@ -1,5 +1,10 @@
-test-*
-package*
+.vscode
+
+/src
 
 node_modules
-/src
+
+package*
+
+test-*
+temp

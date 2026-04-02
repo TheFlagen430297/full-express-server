@@ -5,8 +5,9 @@
  */
 let HoverExplanation  = "Hover to see tooltip";
 
-const { log } = require("console");
+const { log, clear } = require("console");
 let { rmSync } = require(`fs`);
+clear();
 log(`Starting Dev Script`)
 log(`Deleting spare files...`)
 rmSync(`./node_modules`, { recursive: true, force: true });
