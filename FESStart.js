@@ -23,9 +23,8 @@ clear(); //[TheFlagen430297] If you don't know what this is... I can't help you 
 stat(join(__dirname, `src/ExpressServerSettings`, `config.json`), (e) => {
     //? If it hasn't, then we make the files and download all the dependencies.
     if (e) console.log(`=+=+=+=+=+=+=+=+=+=+=+=+=\n    Welcome to FES!\n=+=+=+=+=+=+=+=+=+=+=+=+=\n\nThis is the server's first start.\nSetting up needed files and downloading dependencies... This may take a moment.`);
-        if (e) exec(`npm i express tcp-port-used vhost cookie-parser flaggedapi`, (e, sto, ste) => {
+        if (e) exec(`bun add express tcp-port-used vhost cookie-parser flaggedapi`, (e, sto, ste) => {
             if (e) { console.log(`error: ${e.message}`); return; }
-            if (ste) { console.log(`stderr: ${ste}`); return; }
             stat(join(__dirname, `src`), (e) => { if (e) { mkdir(join(__dirname, `src`), () => {}); } }); //? Creates "./src".
             setTimeout(() => {
                 log = require(`flaggedapi`).log;
@@ -315,7 +314,7 @@ function StartService() {
      * @returns { Promise<string>|void}
      */
     function FindOpenPort(ip) { 
-        let port = (ess.setPort ? ess.setPort : 80)
+        let port = (ess.setPort ? ess.setPort : 80);
         return new Promise((resolve , reject) => {
             if (ess.setPort && typeof ess.setPort != `number`) return reject(`The port that was set in config.js is not a number, therefore, the server was closed.`);
             if (ess.setPort && ess.setPort > 65535) return reject(`The port was set in the config.js to ${ess.setPort}, which is out of range, please set it between 0-65535`);
@@ -326,8 +325,8 @@ function StartService() {
                     if (inUse && !ess.setPort) { port++; loop(); }
                     else resolve(port);
                 }).catch(Error => {
-                    console.error(Error)
-                    reject(`There was an unexpected error, and therefore, the server was closed.`)
+                    console.error(Error);
+                    reject(`There was an unexpected error, and therefore, the server was closed.`);
                 });
             };
         }); 

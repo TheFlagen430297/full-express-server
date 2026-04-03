@@ -6,13 +6,25 @@
 let HoverExplanation  = "Hover to see tooltip";
 
 const { log, clear } = require("console");
-let { rmSync } = require(`fs`);
+const { rmSync, existsSync } = require(`fs`);
+const { join } = require(`path`);
 clear();
-log(`Starting Dev Script`)
-log(`Deleting spare files...`)
-rmSync(`./node_modules`, { recursive: true, force: true });
-rmSync(`./src`, { recursive: true, force: true });
-rmSync(`./package-lock.json`, { recursive: true, force: true });
-rmSync(`./package.json`, { recursive: true, force: true });
-log(`Done, starting setup script...`)
-require(`./FESStart`);
+log("Starting Dev Script");
+log("Deleting spare files...");
+
+const targets = [
+  join(__dirname, "node_modules"),
+  join(__dirname, "src"),
+  join(__dirname, "package-lock.json"),
+  join(__dirname, "package.json"),
+  join(__dirname, "bun.lock"),
+  join(__dirname, "bun.lockb"),
+];
+
+for (const target of targets) {
+  log(`Deleting: ${target} | exists: ${existsSync(target)}`);
+  rmSync(target, { recursive: true, force: true });
+}
+
+log("Done, starting setup script...");
+require("./FESStart");
