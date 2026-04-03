@@ -8,7 +8,7 @@
 let HoverExplanation  = "Hover to see tooltip";
 
 /**The **child_process** library*/
-const { exec } = require("child_process");
+const { exec, spawnSync } = require("child_process");
 /**The **FS** library */
 const { mkdir, mkdirSync, readdir, readdirSync, readFileSync, stat, writeFile, writeFileSync } = require(`fs`);
 const { clear } = require(`console`);
@@ -19,11 +19,17 @@ let settingsURL = `https://raw.githubusercontent.com/TheFlagen430297/full-expres
 
 clear(); //[TheFlagen430297] If you don't know what this is... I can't help you XD JK
 
+let packageManager
+function checkPackageManager(Manager) { const result = spawnSync(Manager, ["--version"], { stdio: "ignore" }); return result.status === 0; }
+if (checkPackageManager(`bun`)) { packageManager = `bun add`}
+else if (checkPackageManager(`npm`)) {packageManager = `npm install` }
+else { console.log(`No known package managers are install, please install bun or npm. `); process.exit(1); }
+
 //? We start by looking and seeing if the config has been generated.
 stat(join(__dirname, `src/ExpressServerSettings`, `config.json`), (e) => {
     //? If it hasn't, then we make the files and download all the dependencies.
     if (e) console.log(`=+=+=+=+=+=+=+=+=+=+=+=+=\n    Welcome to FES!\n=+=+=+=+=+=+=+=+=+=+=+=+=\n\nThis is the server's first start.\nSetting up needed files and downloading dependencies... This may take a moment.`);
-        if (e) exec(`bun add express tcp-port-used vhost cookie-parser flaggedapi`, (e, sto, ste) => {
+        if (e) exec(`${packageManager} express tcp-port-used vhost cookie-parser flaggedapi`, (e, sto, ste) => {
             if (e) { console.log(`error: ${e.message}`); return; }
             stat(join(__dirname, `src`), (e) => { if (e) { mkdir(join(__dirname, `src`), () => {}); } }); //? Creates "./src".
             setTimeout(() => {

@@ -6,25 +6,36 @@
 let HoverExplanation  = "Hover to see tooltip";
 
 const { log, clear } = require("console");
+const { exec } = require("child_process");
 const { rmSync, existsSync } = require(`fs`);
 const { join } = require(`path`);
 clear();
 log("Starting Dev Script");
-log("Deleting spare files...");
-
-const targets = [
-  join(__dirname, "node_modules"),
-  join(__dirname, "src"),
-  join(__dirname, "package-lock.json"),
-  join(__dirname, "package.json"),
-  join(__dirname, "bun.lock"),
-  join(__dirname, "bun.lockb"),
-];
-
-for (const target of targets) {
-  log(`Deleting: ${target} | exists: ${existsSync(target)}`);
-  rmSync(target, { recursive: true, force: true });
+BuildEXE();
+function BuildEXE() {
+  log(`Building exe...`);
+  rmSync(join(__dirname, `FES.exe`), { recursive: true, force: true });
+  exec(`bun build FESStart.js --compile --target=bun-windows-x64 --outfile FES.exe `, (error, stdout, stderr) => {
+    if (error) { log(`Error: ${error.message}`); return; }
+    if (stderr) { log(`Stderr: ${stderr}`); return; }
+    deleteFiles()
+  });
 }
 
-log("Done, starting setup script...");
-require("./FESStart");
+
+function deleteFiles() {
+  log("Deleting spare files...");
+  const targets = [
+    join(__dirname, "node_modules"),
+    join(__dirname, "src"),
+    join(__dirname, "package-lock.json"),
+    join(__dirname, "package.json"),
+    join(__dirname, "bun.lock"),
+    join(__dirname, "bun.lockb"),
+  ];
+
+  for (const target of targets) { rmSync(target, { recursive: true, force: true }); };
+  run()
+}
+
+function run() { log("Done, starting setup script..."); require("./FESStart"); }

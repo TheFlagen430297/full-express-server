@@ -9,3 +9,5 @@ package*
 test-*
 temp
 bun.loc*
+
+*.exe
