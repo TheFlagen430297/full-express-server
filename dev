@@ -22,7 +22,6 @@ function BuildEXE() {
   });
 }
 
-
 function deleteFiles() {
   log("Deleting spare files...");
   const targets = [
