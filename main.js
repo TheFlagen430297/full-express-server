@@ -275,13 +275,6 @@ function runFES() {
         return;
       }
 
-      sendLog(`Bun path: ${bunPath}`);
-      sendLog(`Start file: ${startFile}`);
-      sendLog(`Working dir: ${appFolder}`);
-      sendLog(`bun exists: ${fs.existsSync(bunPath)}`);
-      sendLog(`start file exists: ${fs.existsSync(startFile)}`);
-      sendLog(`app folder exists: ${fs.existsSync(appFolder)}`);
-
       runningProcess = spawn(bunPath, [startFile], {
         cwd: appFolder,
         env: {

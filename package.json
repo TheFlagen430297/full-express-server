@@ -40,12 +40,6 @@
       "installerIcon": "assets/icon.ico",
       "uninstallerIcon": "assets/icon.ico",
       "installerHeaderIcon": "assets/icon.ico"
-    },
-    "extraResources": [
-      {
-        "from": "assets/bun.exe",
-        "to": "libraries/bun.exe"
-      }
-    ]
+    }
   }
 }

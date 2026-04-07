@@ -12,7 +12,7 @@ function cleanMessage(message) {
 
 function addLog(message) {
   if (typeof message !== 'string') return;
-  // if (message.includes('\x1b[2J') || message.includes('\x1B[2J')) log.innerHTML = '';
+  if (message.includes('\x1b[2J') || message.includes('\x1B[2J')) log.innerHTML = '';
 
   const cleaned = cleanMessage(message).trimEnd();
 
