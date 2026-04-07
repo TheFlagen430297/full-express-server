@@ -222,9 +222,9 @@ function StartService() {
              * 
              * @returns { void }
              */
-            Success: (HTTP_StatusCode, payload) => { 
-                if (typeof payload === `string` && res.method === `GET`) return res.status(HTTP_StatusCode).sendFile(payload);
-                if (res.method === `POST`) return res.status(HTTP_StatusCode).json(payload);
+            Success: (HTTP_StatusCode, payload) => {
+                if (typeof payload === `string` && req.method === `GET`) return res.status(HTTP_StatusCode).sendFile(payload);
+                if (req.method === `POST`) return res.status(HTTP_StatusCode).json(payload);
             }
         };
 
@@ -287,7 +287,7 @@ function StartService() {
                     stat(join(__dirname, `src/public_html`, ess.basePage), (Error) => { //? Checks to see if the basePage exists.
                         if (Error && Error?.code === `ENOENT`) return responseType[`Error`](404, `Homepage Not Found`, `The homepage for the server could not be found. If you are the client (You most likely are) please try again later. If you are the server admin, make sure that settings are correct and that the file exist.`); //? The file does not exist and throws a 404.
                         if (Error) return ( responseType[`Error`](500, `Internal Server Error`, `There was an unknown internal server error`), console.log(Error) );
-                        responseType[`Success`](200, join(__dirname, `src/public_html`, ess.basePage))
+                        responseType[`Success`](200, join(__dirname, `src/public_html`, ess.basePage));
                     });
                 } else {
                     let rootPath = join(__dirname, `src/public_html`);
