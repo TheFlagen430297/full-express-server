@@ -8,24 +8,39 @@
 let HoverExplanation  = "Hover to see tooltip";
 
 /**The **child_process** library*/
-const { exec } = require("child_process");
+const { exec, spawnSync } = require("child_process");
 /**The **FS** library */
 const { mkdir, mkdirSync, readdirSync, readFileSync, stat, writeFileSync } = require(`fs`);
 const { clear } = require(`console`);
 const { join } = require("path");
+const bunPath = process.env.BUN_PATH || 'bun';
 let log
 // Change the "dev" to "main" if you want the most stable version.
 let settingsURL = `https://raw.githubusercontent.com/TheFlagen430297/full-express-server/dev/setup/settings.json`;
 
 clear(); //[TheFlagen430297] If you don't know what this is... I can't help you XD JK
 
+let packageManager
+function checkPackageManager(manager) {
+  const result = spawnSync(manager, ['--version'], { stdio: 'ignore' });
+  return result.status === 0;
+}
+
+if (checkPackageManager(bunPath)) {
+  packageManager = `"${bunPath}" add`;
+} else if (checkPackageManager('npm')) {
+  packageManager = 'npm install';
+} else {
+  console.log('No known package managers are installed, please install Bun or npm.');
+  process.exit(1);
+}
+
 //? We start by looking and seeing if the config has been generated.
 stat(join(__dirname, `src/ExpressServerSettings`, `config.json`), (e) => {
     //? If it hasn't, then we make the files and download all the dependencies.
     if (e) console.log(`=+=+=+=+=+=+=+=+=+=+=+=+=\n    Welcome to FES!\n=+=+=+=+=+=+=+=+=+=+=+=+=\n\nThis is the server's first start.\nSetting up needed files and downloading dependencies... This may take a moment.`);
-        if (e) exec(`npm i express tcp-port-used vhost cookie-parser flaggedapi`, (e, sto, ste) => {
+        if (e) exec(`${packageManager} express tcp-port-used vhost cookie-parser flaggedapi`, (e, sto, ste) => {
             if (e) { console.log(`error: ${e.message}`); return; }
-            if (ste) { console.log(`stderr: ${ste}`); return; }
             stat(join(__dirname, `src`), (e) => { if (e) { mkdir(join(__dirname, `src`), () => {}); } }); //? Creates "./src".
             setTimeout(() => {
                 log = require(`flaggedapi`).log;
@@ -128,7 +143,7 @@ function StartService() {
     });
 
     //? Listens for any calls to the server.
-    Server.use(({ hostname, path }, res) => {
+    Server.use((req, res) => {
         ess = JSON.parse(readFileSync(join(__dirname, `src/ExpressServerSettings`, `config.json`)));
 
         /**
@@ -191,7 +206,7 @@ function StartService() {
                         case 405: return { page: false, payload: { path: undefined, errorTitle: title ? title : `HTTP Status Code 405 - Method Not Allowed`, description: description ? description : `The method that was used was not allowed`, HTTP_Status: 405 }}
                         case 418: return { page: false, payload: { path: undefined, errorTitle: `I'm stoopid :P (I'm a Teapot)`, description: `All server requests are ignored due to being in Lockdown`, HTTP_Status: 418 }}
                         case 500:
-                            log(`There was an Internal Server Error at ${Date.now().toISOString()}`, { type: `error` });
+                            log(`There was an Internal Server Error at ${Date.now()}`, { type: `error` });
                             return { page: true, payload: { path: join(filePath, ess.internalErrorPage), errorTitle: title ? title : `HTTP Status Code 500 - Internal Server Error`, description: description ? description : `The Server had an unknown internal error`, HTTP_Status: 500 }}
                         default: break;
                     };
@@ -207,85 +222,98 @@ function StartService() {
              * 
              * @returns { void }
              */
-            Success: (HTTP_StatusCode, payload) => { 
-                if (typeof payload === `string`) return res.status(HTTP_StatusCode).sendFile(payload);
-                res.status(HTTP_StatusCode).send(payload);
+            Success: (HTTP_StatusCode, payload) => {
+                if (typeof payload === `string` && req.method === `GET`) return res.status(HTTP_StatusCode).sendFile(payload);
+                if (req.method === `POST`) return res.status(HTTP_StatusCode).json(payload);
             }
         };
 
         if (ess.lockdown) { responseType[`Error`](418); log(`A request was stopped due to being in Lockdown, time: ${Date.now()}`, { type: `Warning` }); return; } //! If lockdown is true then it will throw out all requests to the server.
         
-        let subdomainCheck = /([a-z0-9]*)(?:\.)([a-z0-9]*)(?:\.*)(.*)/.exec(hostname);
+        let subdomainCheck = /([a-z0-9]*)(?:\.)([a-z0-9]*)(?:\.*)(.*)/.exec(req.hostname);
 
         if (subdomainCheck && !subdomainList.includes(subdomainCheck[1])) return responseType[`Error`](404, `Error With Subdomain`, `The subdomain (${subdomainCheck[1]}) does not exist on this server. This could be due to: A Typing error (check your spelling), The subdomain does not exist at all, The Subdomain was not loaded or was created outside of startup. (Creating the files in the backend)`); //? Checks if the subdomain exists, if not, returns 404.
-        if (hostname != ess.domain) return responseType[`Error`](403, `Mismatch Domains`, `The supplied domain (${hostname}) did not match the set domain in this server. This could be due to: Trying to directly connect to the server's IP and not it's set up domain, A domain that connects to the IP address of the server but is not the set domain.`); //! If the hostname does not match the domain set, it is stopped.
-    
-        stat(join(__dirname, `src/public_html`, `private.json`), (e) => {
-            if (!e) privateURL = JSON.parse(readFileSync(join(__dirname, `src/public_html`, `private.json`)));
-            if (!e && path == privateURL.find((url) => url == path)) return responseType[`Error`](403, `URL is Private`, `The URL is private and you don't have access to it`); //? If the file is private and someone tries to access it, it will block the client and throw a 403.
-            if (path == `/favicon.ico`) { //? Browsers will make a url request for a favicon, so this allows you to decide whether you wish to give a favicon via a url request.
-                //[TheFlagen430297] It is recommended to set your favicon in your HTML code.
-                //[TheFlagen430297] But, you can change this in "./src/ExpressServerSettings/config.json"
-                //[TheFlagen430297] If you use this method, you need to have a image file called "favicon.ico" in "./src/public_html" and in any subdomains.
-                if (ess.useFaviconRequest) return stat(join(__dirname, `/src/public_html`, `favicon.ico`), (Error) => Error && Error.code === `ENOENT` ? responseType[`Error`](404, `Favicon Not Found`, `Ohh okay, odd... The favicon.ico couldn't be found.`) : Error ? ( responseType[`Error`](500, `Internal Server Error`, `There was an internal server error fetching the favicon`), log(`There was a Internal Server Error while fetching the favicon.`, { type: `warning`}), console.log(Error) ) : responseType[`Success`](200, join(__dirname, `src/public_html`, `favicon.ico`))); // Checks to see if the server is using the favicon request, if so, it will check if the favicon exist, if not, it will throw a 404, if there was an error, it will handle the error, if it exist, it will send the file.
-                responseType[`Error`](405, `Query Favicon Disabled`, `Querying /favicon.ico is disabled on this server`); //If the favicon request method is disabled, the server will send a 405.
-            } else if (path == `/controls`) {
+        if (req.hostname != ess.domain) return responseType[`Error`](403, `Mismatch Domains`, `The supplied domain (${req.hostname}) did not match the set domain in this server. This could be due to: Trying to directly connect to the server's IP and not it's set up domain, A domain that connects to the IP address of the server but is not the set domain.`); //! If the hostname does not match the domain set, it is stopped.
 
-                //TODO: In the future, remove this method of control handling and remove controls on the main domain. (The controls should only be in the panel subdomain)
+        if (req.method == `POST`) {
+            if (!req.body) return responseType[`Error`](400, `No Body`, `The request did not include a body.`);
+            if (!req.body.plugin) return responseType[`Error`](400, `No Plugin`, `The request did not include a plugin.`);
+            if (!req.body.payload) return responseType[`Error`](400, `No Payload`, `The request did not include a payload.`);
+            const plugins = readdirSync(join(__dirname, `src/plugins`));
+            if (plugins.includes(req.body.plugin + `.js`)) {
+                let plugin = require(join(__dirname, `src/plugins`, req.body.plugin + `.js`));
+                if (!plugin.enabled) return responseType[`Error`](403, `Plugin Disabled`, `The requested plugin is disabled.`);
+                plugin.run(req.body.payload).then(pluginResponse => responseType[`Success`](200, pluginResponse)).catch(Error => responseType[`Error`](500, `Internal Server Error`, `There was an error running the plugin. The error is: ${Error}`));
+            } else return responseType[`Error`](400, `Invalid Plugin`, `The requested plugin is not valid.`);
 
-                stat(join(__dirname, `src/public_html`, `controls.js`), (error) => {
-                    if (error) return responseType[`Error`](403, `Controls Disabled`, `Controls are disabled on this domain.`); //If the controls.js does not exist, it will treat it as it is disabled, which will throw a 403 and act like the user doesn't have permission.
-                    if (Object.keys(query).length == 0) return responseType[`Error`](400, `No Params Passed`, `The request did not include any params. (Can't do anything if you don't tell me what to do lol)`);
-                    let { kill } = require(join(__dirname, `/src/public_html`, `controls.js`));
-                    stat(join(__dirname, `src/public_html`, `users.json`), (Error) => {
-                        if (Error) return Error.code === `ENOENT` ? responseType[`Error`](404, `User.json Not Found`, `The users.json file could not be found`) : ( responseType[`Error`](500, `Internal Server Error`, `There was an internal server error fetching the users.json file`), log(`There was a Internal Server Error while fetching the users.json file`, { type: `warning` }), console.log(Error) ); // If the users.json does not exist, throw a 404, if it was another error, throw a 500.
-                        let users = JSON.parse(readFileSync(join(__dirname, `user.json`)));
-                        if (query.type === `kill`) {
-                            if (!Object.keys(query).includes(`oauth`)) return responseType[`Error`](401, `Missing oauth param`, `You did not provide the oauth param`); //If the client did not provide a oauth param, throw a 401.
-                            if (!Object.keys(query).includes(`user`)) return responseType[`Error`](401, `Missing user param`, `You did not provide the user param`); //If the client did not provide a user param, throw a 401.
-                            users.forEach((user, index, array) => {
-                                if (query.user == user.name) {
-                                    if (["kill", "administrator"].find(x => user.permissions.includes(x))) {
-                                        if (query.oauth === `2546`) {
-                                            responseType[`Success`](200, { status: 200, message: `The server shut down.` });
-                                            kill(Object.keys(query).length > 0 ? (query.code ? query.code : 0) : 0);
-                                        } else responseType[`Error`](403, `Incorrect oauth`, `oauth param incorrect`);
-                                    } else return responseType[`Error`](403, `No Permission`, `You do not have permission to use this`);
-                                } else if (index == array.length - 1) return responseType[`Error`](404, `User Not Found`, `The User does not exist.`);
-                            })
-                        } else return responseType[`Error`](400, `Command Not Found`, `The type of the action does not exist.`);
+        } else if (req.method == `GET`) {
+            stat(join(__dirname, `src/public_html`, `private.json`), (e) => {
+                if (!e) privateURL = JSON.parse(readFileSync(join(__dirname, `src/public_html`, `private.json`)));
+                if (!e && req.path == privateURL.find((url) => url == req.path)) return responseType[`Error`](403, `URL is Private`, `The URL is private and you don't have access to it`); //? If the file is private and someone tries to access it, it will block the client and throw a 403.
+                if (req.path == `/favicon.ico`) { //? Browsers will make a url request for a favicon, so this allows you to decide whether you wish to give a favicon via a url request.
+                    //[TheFlagen430297] It is recommended to set your favicon in your HTML code.
+                    //[TheFlagen430297] But, you can change this in "./src/ExpressServerSettings/config.json"
+                    //[TheFlagen430297] If you use this method, you need to have a image file called "favicon.ico" in "./src/public_html" and in any subdomains.
+                    if (ess.useFaviconRequest) return stat(join(__dirname, `/src/public_html`, `favicon.ico`), (Error) => Error && Error.code === `ENOENT` ? responseType[`Error`](404, `Favicon Not Found`, `Ohh okay, odd... The favicon.ico couldn't be found.`) : Error ? ( responseType[`Error`](500, `Internal Server Error`, `There was an internal server error fetching the favicon`), log(`There was a Internal Server Error while fetching the favicon.`, { type: `warning`}), console.log(Error) ) : responseType[`Success`](200, join(__dirname, `src/public_html`, `favicon.ico`))); // Checks to see if the server is using the favicon request, if so, it will check if the favicon exist, if not, it will throw a 404, if there was an error, it will handle the error, if it exist, it will send the file.
+                    responseType[`Error`](405, `Query Favicon Disabled`, `Querying /favicon.ico is disabled on this server`); //If the favicon request method is disabled, the server will send a 405.
+                } else if (req.path == `/controls`) {
+
+                    //TODO: In the future, remove this method of control handling and remove controls on the main domain. (The controls should only be in the panel subdomain)
+
+                    stat(join(__dirname, `src/public_html`, `controls.js`), (error) => {
+                        if (error) return responseType[`Error`](403, `Controls Disabled`, `Controls are disabled on this domain.`); //If the controls.js does not exist, it will treat it as it is disabled, which will throw a 403 and act like the user doesn't have permission.
+                        if (Object.keys(query).length == 0) return responseType[`Error`](400, `No Params Passed`, `The request did not include any params. (Can't do anything if you don't tell me what to do lol)`);
+                        let { kill } = require(join(__dirname, `/src/public_html`, `controls.js`));
+                        stat(join(__dirname, `src/public_html`, `users.json`), (Error) => {
+                            if (Error) return Error.code === `ENOENT` ? responseType[`Error`](404, `User.json Not Found`, `The users.json file could not be found`) : ( responseType[`Error`](500, `Internal Server Error`, `There was an internal server error fetching the users.json file`), log(`There was a Internal Server Error while fetching the users.json file`, { type: `warning` }), console.log(Error) ); // If the users.json does not exist, throw a 404, if it was another error, throw a 500.
+                            let users = JSON.parse(readFileSync(join(__dirname, `user.json`)));
+                            if (query.type === `kill`) {
+                                if (!Object.keys(query).includes(`oauth`)) return responseType[`Error`](401, `Missing oauth param`, `You did not provide the oauth param`); //If the client did not provide a oauth param, throw a 401.
+                                if (!Object.keys(query).includes(`user`)) return responseType[`Error`](401, `Missing user param`, `You did not provide the user param`); //If the client did not provide a user param, throw a 401.
+                                users.forEach((user, index, array) => {
+                                    if (query.user == user.name) {
+                                        if (["kill", "administrator"].find(x => user.permissions.includes(x))) {
+                                            if (query.oauth === `2546`) {
+                                                responseType[`Success`](200, { status: 200, message: `The server shut down.` });
+                                                kill(Object.keys(query).length > 0 ? (query.code ? query.code : 0) : 0);
+                                            } else responseType[`Error`](403, `Incorrect oauth`, `oauth param incorrect`);
+                                        } else return responseType[`Error`](403, `No Permission`, `You do not have permission to use this`);
+                                    } else if (index == array.length - 1) return responseType[`Error`](404, `User Not Found`, `The User does not exist.`);
+                                })
+                            } else return responseType[`Error`](400, `Command Not Found`, `The type of the action does not exist.`);
+                        })
                     })
-                })
-            } else if (path == `/`) {
-                stat(join(__dirname, `src/public_html`, ess.basePage), (Error) => { //? Checks to see if the basePage exists.
-                    if (Error && Error?.code === `ENOENT`) return responseType[`Error`](404, `Homepage Not Found`, `The homepage for the server could not be found. If you are the client (You most likely are) please try again later. If you are the server admin, make sure that settings are correct and that the file exist.`); //? The file does not exist and throws a 404.
-                    if (Error) return ( responseType[`Error`](500, `Internal Server Error`, `There was an unknown internal server error`), console.log(Error) );
-                    responseType[`Success`](200, join(__dirname, `src/public_html`, ess.basePage))
-                });
-            } else {
-                let rootPath = join(__dirname, `src/public_html`);
-                let hasFileExtensionRegex = /(.*)([^\w\s\/])(.*)/
-                let separator = hasFileExtensionRegex.exec(path)?.[2];
+                } else if (req.path == `/`) {
+                    stat(join(__dirname, `src/public_html`, ess.basePage), (Error) => { //? Checks to see if the basePage exists.
+                        if (Error && Error?.code === `ENOENT`) return responseType[`Error`](404, `Homepage Not Found`, `The homepage for the server could not be found. If you are the client (You most likely are) please try again later. If you are the server admin, make sure that settings are correct and that the file exist.`); //? The file does not exist and throws a 404.
+                        if (Error) return ( responseType[`Error`](500, `Internal Server Error`, `There was an unknown internal server error`), console.log(Error) );
+                        responseType[`Success`](200, join(__dirname, `src/public_html`, ess.basePage));
+                    });
+                } else {
+                    let rootPath = join(__dirname, `src/public_html`);
+                    let hasFileExtensionRegex = /(.*)([^\w\s\/])(.*)/
+                    let separator = hasFileExtensionRegex.exec(req.path)?.[2];
 
-                if (separator && separator != `.`) return responseType[`Error`](400, `Incorrect URL Punctuation`, `The file extension separator is (${separator}), which is invalid. You must use (.) or remove the (${separator})`);
+                    if (separator && separator != `.`) return responseType[`Error`](400, `Incorrect URL Punctuation`, `The file extension separator is (${separator}), which is invalid. You must use (.) or remove the (${separator})`);
 
-                let filePath = hasFileExtensionRegex.test(path) ? join(rootPath, path) : join(rootPath, path + `.html`);
-                
-                stat(filePath, (Error) => {
-                    if (Error) {
-                        if (separator && !hasFileExtensionRegex.exec(path)?.[3]) return responseType[`Error`](400, `Missing File Extension`,  `The URL ended with '.' which is invalid. You need to either provide a file extension or remove the '.'`);
-                        if (Error && Error.code === "ENOENT") return responseType[`Error`](404);
-                        return ( responseType[`Error`](500), console.log(Error));
-                    };
-                    responseType[`Success`](200, filePath);
-                });
-            }
-        });
+                    let filePath = hasFileExtensionRegex.test(req.path) ? join(rootPath, req.path) : join(rootPath, req.path + `.html`);
+
+                    stat(filePath, (Error) => {
+                        if (Error) {
+                            if (separator && !hasFileExtensionRegex.exec(req.path)?.[3]) return responseType[`Error`](400, `Missing File Extension`,  `The URL ended with '.' which is invalid. You need to either provide a file extension or remove the '.'`);
+                            if (Error && Error.code === "ENOENT") return responseType[`Error`](404);
+                            return ( responseType[`Error`](500), console.log(Error));
+                        };
+                        responseType[`Success`](200, filePath);
+                    });
+                }
+            });
+        } else {
+
+        }
     });
 
     //TODO: This will handle POST requests and will route requests through plugins. Plugins must handle the passed data and handle accordingly.
-    // Server.use()
-
     FindOpenPort(ess.ip).then(openPort => {
         createServer(Server).listen(openPort)
             .on(`listening`, () => { //? Creates the server and opens it.
@@ -315,7 +343,7 @@ function StartService() {
      * @returns { Promise<string>|void}
      */
     function FindOpenPort(ip) { 
-        let port = (ess.setPort ? ess.setPort : 80)
+        let port = (ess.setPort ? ess.setPort : 80);
         return new Promise((resolve , reject) => {
             if (ess.setPort && typeof ess.setPort != `number`) return reject(`The port that was set in config.js is not a number, therefore, the server was closed.`);
             if (ess.setPort && ess.setPort > 65535) return reject(`The port was set in the config.js to ${ess.setPort}, which is out of range, please set it between 0-65535`);
@@ -326,8 +354,8 @@ function StartService() {
                     if (inUse && !ess.setPort) { port++; loop(); }
                     else resolve(port);
                 }).catch(Error => {
-                    console.error(Error)
-                    reject(`There was an unexpected error, and therefore, the server was closed.`)
+                    console.error(Error);
+                    reject(`There was an unexpected error, and therefore, the server was closed.`);
                 });
             };
         }); 
@@ -398,15 +426,16 @@ function createNewSubdomain(options) {
 function plugins() {
     stat(join(__dirname, `src/plugins`), (e) => {
         if (e) { mkdirSync(join(__dirname, `src/plugins`)); log(`UPDATED\nThis server now includes plugins!\nPlugins can be used to run code alongside the server\nRead the documentaion on the GitHub Repo to create your own`, { bold: true, type: `success` });}
-        let plugins = readdirSync(join(__dirname, `src/plugins`));
+        let plugins = readdirSync(join(__dirname, `src/plugins`), { withFileTypes: true});
         if (!plugins.length) return log(`There are no plugins to load`, { italic: true, type: "info", color: `ff2`});
-            plugins.forEach(x => {
-            const plugin = require(join(__dirname, `src/plugins`, x));
-            if (plugin.enabled) { log(`Loading Plugin: ${plugin.name}`, { italic: true }); plugin.run(); } 
-            else log(`The plugin: ${plugin.name}, is disabled and was not loaded`, { italic: true, type: "info", color: `a00`});
+        plugins.forEach(x => {
+            if (x.isFile()) {
+                const plugin = require(join(__dirname, `src/plugins`, x.name));
+                if (plugin.enabled) { log(`Loading Plugin: ${plugin.name}`, { italic: true }); plugin.run(); } 
+                else log(`The plugin: ${plugin.name}, is disabled and was not loaded`, { italic: true, type: "info", color: `a00`});
+            }
         });
-    })
-}
-
+    });
+};
 
 module.exports = { createNewSubdomain };
