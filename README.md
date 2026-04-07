@@ -1,6 +1,17 @@
-<h1>FES</h1>
-<h2>Full Express Server <i>(FES)</i> is a full express server setup and run script :)</h2>
-<p>It allows you to fully setup an http express-based web server that can give you pages and also subdomains!
-    <br>All you have to do is download <b>FESStart.js</b> and run "<code>node FESStart.js</code>" and the rest is handled for you.
+<h1>FES Launcher</h1>
+
+<h2>
+  Full Express Server <i>(FES)</i> is a powerful setup and run tool for Express-based servers.
+</h2>
+
+<p>
+  FES makes it easy to spin up a complete HTTP server with support for pages and subdomains — no complex setup required.
 </p>
-<h3>Good luck and happy coding! 😁</h3>
+
+<p>
+  Just download and run
+  <br>
+  FES will handle the rest automatically.
+</p>
+
+<h3>Good luck, and happy coding! 😁</h3>

@@ -1,0 +1,51 @@
+{
+  "name": "fes-launcher",
+  "version": "1.0.0",
+  "description": "FES Launcher - Full Express Server launcher and manager",
+  "author": "TheFlagen430297",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder"
+  },
+  "devDependencies": {
+    "electron": "^41.1.1",
+    "electron-builder": "^26.8.1"
+  },
+  "dependencies": {
+    "ansi_up": "^6.0.6",
+    "cookie-parser": "^1.4.7",
+    "express": "^5.2.1",
+    "flaggedapi": "^3.3.0",
+    "tcp-port-used": "^1.0.2",
+    "vhost": "^3.0.2"
+  },
+  "build": {
+    "appId": "com.theflagen.feslauncher",
+    "productName": "FES Launcher",
+    "directories": {
+      "buildResources": "assets"
+    },
+    "files": [
+      "**/*"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "assets/icon.ico",
+      "uninstallerIcon": "assets/icon.ico",
+      "installerHeaderIcon": "assets/icon.ico"
+    },
+    "extraResources": [
+      {
+        "from": "assets/bun.exe",
+        "to": "libraries/bun.exe"
+      }
+    ]
+  }
+}

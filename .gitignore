@@ -1,10 +1,11 @@
 .vscode
 
-/src
-
 node_modules
 
-package*
+dist
+fes-data
 
 test-*
 temp
+
+bun.exe
