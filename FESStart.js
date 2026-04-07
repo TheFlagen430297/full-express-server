@@ -10,7 +10,7 @@ let HoverExplanation  = "Hover to see tooltip";
 /**The **child_process** library*/
 const { exec } = require("child_process");
 /**The **FS** library */
-const { mkdir, mkdirSync, readdir, readdirSync, readFileSync, stat, writeFile, writeFileSync } = require(`fs`);
+const { mkdir, mkdirSync, readdirSync, readFileSync, stat, writeFileSync } = require(`fs`);
 const { clear } = require(`console`);
 const { join } = require("path");
 let log
