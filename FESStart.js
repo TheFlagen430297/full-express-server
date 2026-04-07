@@ -13,6 +13,7 @@ const { exec, spawnSync } = require("child_process");
 const { mkdir, mkdirSync, readdir, readdirSync, readFileSync, stat, writeFile, writeFileSync } = require(`fs`);
 const { clear } = require(`console`);
 const { join } = require("path");
+const bunPath = process.env.BUN_PATH || 'bun';
 let log
 // Change the "dev" to "main" if you want the most stable version.
 let settingsURL = `https://raw.githubusercontent.com/TheFlagen430297/full-express-server/dev/setup/settings.json`;
@@ -20,10 +21,19 @@ let settingsURL = `https://raw.githubusercontent.com/TheFlagen430297/full-expres
 clear(); //[TheFlagen430297] If you don't know what this is... I can't help you XD JK
 
 let packageManager
-function checkPackageManager(Manager) { const result = spawnSync(Manager, ["--version"], { stdio: "ignore" }); return result.status === 0; }
-if (checkPackageManager(`bun`)) { packageManager = `bun add`}
-else if (checkPackageManager(`npm`)) {packageManager = `npm install` }
-else { console.log(`No known package managers are install, please install bun or npm. `); process.exit(1); }
+function checkPackageManager(manager) {
+  const result = spawnSync(manager, ['--version'], { stdio: 'ignore' });
+  return result.status === 0;
+}
+
+if (checkPackageManager(bunPath)) {
+  packageManager = `"${bunPath}" add`;
+} else if (checkPackageManager('npm')) {
+  packageManager = 'npm install';
+} else {
+  console.log('No known package managers are installed, please install Bun or npm.');
+  process.exit(1);
+}
 
 //? We start by looking and seeing if the config has been generated.
 stat(join(__dirname, `src/ExpressServerSettings`, `config.json`), (e) => {
