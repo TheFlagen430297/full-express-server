@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>FES Launcher</title>
+  <title>Launcher</title>
 
   <style>
     body {
@@ -15,6 +15,7 @@
     }
 
     #header {
+      user-select: none;
       background: #141414;
       color: #0f0;
       padding: 15px;
@@ -22,7 +23,7 @@
       font-size: 24px;
     }
 
-    #controls { padding: 10px; }
+    #controls { user-select: none; padding: 10px; }
 
     button {
       margin-right: 10px;
@@ -54,7 +55,7 @@
 </head>
 
 <body>
-  <div id="header">FES Launcher</div>
+  <div id="header">Full Express Server - Launcher</div>
 
   <div id="controls">
     <button id="startBtn">Start</button>

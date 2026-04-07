@@ -51,7 +51,7 @@ function createWindow() {
   mainWindow.loadFile(path.join(__dirname, 'renderer', 'index.html'));
 
   setTimeout(async () => {
-    sendLog('Welcome to the FES Windows Launcher!');
+    sendLog('Welcome to the FES Launcher for Windows!');
     sendLog(`Using data folder: ${getAppFolder()}`);
 
     try {
